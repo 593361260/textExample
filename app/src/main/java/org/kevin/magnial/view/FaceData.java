@@ -18,12 +18,15 @@ public class FaceData {
      */
     public static String[] gifFaceName = {
             ":teasing:",
+            ":chuckle:"
     };
     /**
      * 这里对应的emoji 路径
      */
     public static String[] gif = {
             "gif/teasing.gif",
+            "gif/chuckle.gif"
+
     };
 
     public static String[] faceId = {
@@ -585,8 +588,8 @@ public class FaceData {
 
     //静态块的使用
     static {
-        gifFaceInfo = new HashMap<String, String>();
-        staticFaceInfo = new HashMap<String, String>();
+        gifFaceInfo = new HashMap<>();
+        staticFaceInfo = new HashMap<>();
         for (int i = 0; i < gifFaceName.length; i++) {
             gifFaceInfo.put(gifFaceName[i], gif[i]);
         }

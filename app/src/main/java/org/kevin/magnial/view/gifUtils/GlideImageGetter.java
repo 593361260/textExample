@@ -2,65 +2,51 @@ package org.kevin.magnial.view.gifUtils;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.Request;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.ViewTarget;
-
+import com.bumptech.glide.request.transition.Transition;
 
 import org.kevin.magnial.R;
-import org.kevin.magnial.view.AppTools;
 
-import java.util.HashSet;
-import java.util.Set;
-
-/**
- * @author CentMeng csdn@vip.163.com on 16/7/19.
- */
 public class GlideImageGetter implements Html.ImageGetter, Drawable.Callback {
 
     private final Context mContext;
 
     private final TextView mTextView;
 
-    private final Set<ImageGetterViewTarget> mTargets;
 
     public static GlideImageGetter get(View view) {
         return (GlideImageGetter) view.getTag(R.id.drawable_callback_tag);
     }
 
     public void clear() {
-        GlideImageGetter prev = get(mTextView);
-        if (prev == null) return;
-
-        for (ImageGetterViewTarget target : prev.mTargets) {
-            Glide.clear(target);
-        }
+        Glide.with(mContext).clear(mTextView);
     }
 
     public GlideImageGetter(Context context, TextView textView) {
         this.mContext = context;
         this.mTextView = textView;
-
-        //        clear(); 屏蔽掉这句在TextView中可以加载多张图片
-        mTargets = new HashSet<>();
         mTextView.setTag(R.id.drawable_callback_tag, this);
     }
 
     @Override
     public Drawable getDrawable(String url) {
-        final UrlDrawable_Glide urlDrawable = new UrlDrawable_Glide();
+        final GifDraw urlDrawable = new GifDraw();
         Glide.with(mContext)
                 .load(url)
-                .override(1, 1)
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                 .into(new ImageGetterViewTarget(mTextView, urlDrawable));
         return urlDrawable;
     }
@@ -80,61 +66,60 @@ public class GlideImageGetter implements Html.ImageGetter, Drawable.Callback {
 
     }
 
-    private class ImageGetterViewTarget extends ViewTarget<TextView, GlideDrawable> {
+    private class ImageGetterViewTarget extends ViewTarget<TextView, Drawable> {
 
-        private final UrlDrawable_Glide mDrawable;
+        private final GifDraw mDrawable;
 
-        private ImageGetterViewTarget(TextView view, UrlDrawable_Glide drawable) {
+        private ImageGetterViewTarget(TextView view, GifDraw drawable) {
             super(view);
-            mTargets.add(this);
             this.mDrawable = drawable;
         }
 
         @Override
-        public void onResourceReady(final GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
+        public void onLoadFailed(@Nullable Drawable errorDrawable) {
+
+        }
+
+        @Override
+        public void onResourceReady(@NonNull final Drawable resource, @Nullable Transition<? super Drawable> transition) {
             Rect rect;
-            if (resource.getIntrinsicWidth() > 100) {
-                float width;
-                float height;
-                System.out.println("Image width is " + resource.getIntrinsicWidth());
-                System.out.println("View width is " + view.getWidth());
-                if (resource.getIntrinsicWidth() >= getView().getWidth()) {
-                    float downScale = (float) resource.getIntrinsicWidth() / getView().getWidth();
-                    width = (float) resource.getIntrinsicWidth() / (float) downScale;
-                    height = (float) resource.getIntrinsicHeight() / (float) downScale;
-                } else {
-                    float multiplier = (float) getView().getWidth() / resource.getIntrinsicWidth();
-                    width = (float) resource.getIntrinsicWidth() * (float) multiplier;
-                    height = (float) resource.getIntrinsicHeight() * (float) multiplier;
-                }
-                System.out.println("New Image width is " + width);
-                rect = new Rect(8, 0, AppTools.Companion.dp2px(mContext, 15), AppTools.Companion.dp2px(mContext, 15));
-            } else {
-                rect = new Rect(8, 0, AppTools.Companion.dp2px(mContext, 15) + 8, AppTools.Companion.dp2px(mContext, 15));
-            }
+            //            if (resource.getIntrinsicWidth() > 100) {
+            //                float width;
+            //                float height;
+            //                if (resource.getIntrinsicWidth() >= getView().getWidth()) {
+            //                    float downScale = (float) resource.getIntrinsicWidth() / getView().getWidth();
+            //                    width = (float) resource.getIntrinsicWidth() / downScale;
+            //                    height = (float) resource.getIntrinsicHeight() / downScale;
+            //                } else {
+            //                    float multiplier = (float) getView().getWidth() / resource.getIntrinsicWidth();
+            //                    width = (float) resource.getIntrinsicWidth() * multiplier;
+            //                    height = (float) resource.getIntrinsicHeight() * multiplier;
+            //                }
+            //                rect = new Rect(8, 0, AppTools.Companion.dp2px(mContext, 15), AppTools.Companion.dp2px(mContext, 15));
+            //            }
+            rect = new Rect(8, 0, resource.getIntrinsicWidth() + 8, resource.getIntrinsicHeight());
             resource.setBounds(rect);
             mDrawable.setBounds(rect);
             mDrawable.setDrawable(resource);
-            if (resource.isAnimated()) {
+            if (resource instanceof GifDrawable) {
                 mDrawable.setCallback(get(getView()));
-                resource.setLoopCount(GlideDrawable.LOOP_FOREVER);
-                resource.start();
+                ((GifDrawable) resource).start();
             }
             getView().addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                 @Override
                 public void onViewAttachedToWindow(View v) {
-                    /**
+                    /*
                      * 添加视图
                      */
-                    if (resource != null)
-                        resource.start();
+                    if (resource instanceof Animatable)
+                        ((GifDrawable) resource).start();
                 }
 
                 @Override
                 public void onViewDetachedFromWindow(View v) {
-                    if (resource != null)
-                        if (resource.isRunning())
-                            resource.stop();
+                    if (resource instanceof Animatable)
+                        if (((GifDrawable) resource).isRunning())
+                            ((GifDrawable) resource).stop();
                 }
             });
             getView().setText(getView().getText());
@@ -149,7 +134,7 @@ public class GlideImageGetter implements Html.ImageGetter, Drawable.Callback {
         }
 
         @Override
-        public void setRequest(Request request) {
+        public void setRequest(@Nullable Request request) {
             this.request = request;
         }
     }

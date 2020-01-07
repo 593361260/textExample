@@ -1,7 +1,9 @@
 package org.kevin.magnial;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -14,10 +16,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        String text = "[剧透:这是一段剧透文字] 动态表情:teasing::teasing::teasing:  emoji   :anguished::apple::art:  #我是标签可以点击的# @王昭君  https://www.baidu.com";
-        SpolierTextView spoiler_Text =  findViewById(R.id.tv_Spoiler);
+        String text = "[剧透:这是一段剧透文字] 动态表情:chuckle::teasing::teasing:  emoji   :anguished::apple::art:  #我是标签可以点击的# @王昭君  https://www.baidu.com";
+        SpolierTextView spoiler_Text = findViewById(R.id.tv_Spoiler);
         spoiler_Text.setData(AppConfig.getImageHtml(text));
-
     }
 
     @Override

@@ -2,7 +2,6 @@ package org.kevin.magnial.view;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -12,8 +11,10 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.v4.view.MotionEventCompat;
-import android.support.v7.widget.AppCompatTextView;
+
+import androidx.core.view.MotionEventCompat;
+import androidx.appcompat.widget.AppCompatTextView;
+
 import android.text.Html;
 import android.text.Layout;
 import android.text.Spannable;
@@ -26,6 +27,7 @@ import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -190,6 +192,7 @@ public class SpolierTextView extends AppCompatTextView {
             ImageSpan[] imgs = tmep.getSpans(0, end, ImageSpan.class);
             for (ImageSpan url : imgs) {
                 VerticalImageSpan span = new VerticalImageSpan(getUrlDrawable(url.getSource(), this), url.getSource());
+                Log.d("Mozator", "  " + tmep.getSpanStart(url) + "  " + tmep.getSpanEnd(url));
                 tmep.setSpan(span, tmep.getSpanStart(url), tmep.getSpanEnd(url), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
